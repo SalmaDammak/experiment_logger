@@ -1,3 +1,26 @@
+'''
+This modules logs experiments in a structured way. It expects the following structure:
+    curr_dir
+        main.py/main.sh # (optional) The main script to run IF calling it from terminal 
+        logger.py       # A local copy of this file
+        datapaths.txt   # A file with key=value pairs of data paths
+        codepaths.txt   # A file with paths to external code to copy
+
+It can be called in two ways:
+    1. From terminal: python3 logger.py         # This will run main.sh or main.py
+    2. From a script: logger.start_experiment() # This will not run additional .py scripts, but do all other logging
+
+The logger will create a new directory with the following structure:
+	curr_dir_[date_time] # Same level as curr_dir
+		Code             # Contains a copy of all code listed in codepaths.txt and environment.txt with Python version, installed packages, Docker image, Slurm job ID, and node name
+		Results          # Contains results saved using get_results_directory() and terminal_output.txt
+		main.py/main.sh  # A copy of the main script from curr_dir
+		logger.py        # A copy of this file
+		datapaths.txt    # A copy of datapaths.txt from curr_dir
+		codepaths.txt    # A copy of codepaths.txt from curr_dir with relative paths to the copied code, so this folder can be re-run as is
+
+'''
+
 import os
 import sys
 import shutil
