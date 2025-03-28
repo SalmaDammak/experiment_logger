@@ -138,15 +138,40 @@ def initialize_experiment_folder():
     
     print(f"Initialized experiment folder in: {folder_path}")
 
-# def start_experiment():
-#     # This function is specifically to allow calling this from within any script 
-#     # i.e., put logger.start_experiment() in any file and it should do its loggy thing
-    
-#     setup_experiment_directory()
-#     capture_environment_info()
-#     copy_external_code()
-#     load_data_paths()
-#     # log_terminal()
+# ======================================================================================
+# Within .py script usage: put "logger.start_experiment()"
+# in any file and it will do the same thing as running it from terminal.
+# ======================================================================================
+class Tee:
+    def __init__(self, *files):
+        self.files = files
+
+    def write(self, obj):
+        for f in self.files:
+            f.write(obj)
+            f.flush()  # Ensure the output is written immediately
+
+    def flush(self):
+        for f in self.files:
+            f.flush()
+
+def log_terminal():
+    # Log terminal output to a file
+    with open(os.path.join(RESULTS_DIR, "terminal_output.txt"), "w") as log_file:
+        sys.stdout = Tee(sys.stdout, log_file)
+        sys.stderr = Tee(sys.stderr, log_file)
+
+def start_experiment():
+    setup_experiment_directory()
+    capture_environment_info()
+    copy_external_code()
+    load_data_paths()
+    log_terminal()
+
+# ======================================================================================
+# Terminal usage: to be called in terminal as "python3 logger.py" where it will run 
+# main.sh (default if present) or main.py.
+# ======================================================================================
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--initialize":
