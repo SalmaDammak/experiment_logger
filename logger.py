@@ -99,13 +99,26 @@ def get_results_directory():
 
 # Run main.py with verified paths
 def run_experiment():
-    main_script = os.path.join(EXP_DIR, "main.py")
+    main_script_py = os.path.join(EXP_DIR, "main.py")
+    main_script_sh = os.path.join(EXP_DIR, "main.sh")
     
-    if not os.path.exists(main_script):
-        raise FileNotFoundError("main.py not found in experiment directory")
-
+    if not os.path.exists(main_script_py) and not os.path.exists(main_script_sh):
+        raise FileNotFoundError("Neither main.py nor main.sh found in experiment directory, please provide one.")
+    
+    if os.path.exists(main_script_py) and os.path.exists(main_script_sh):
+        print("WARNING: Both main.py and main.sh found in experiment directory. Running main.sh.")
+    
+    if os.path.exists(main_script_sh):
+        script_path = main_script_sh
+    else:
+        script_path = main_script_py
+    
     with open(os.path.join(RESULTS_DIR, "terminal_output.txt"), "w") as log_file:
-        process = subprocess.Popen(["python3", main_script], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        if script_path.endswith(".sh"):
+            process = subprocess.Popen(["sh", script_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        else:
+            process = subprocess.Popen(["python3", script_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        
         for line in process.stdout:
             print(line, end='')  # Print to terminal
             log_file.write(line)  # Write to file
@@ -117,22 +130,23 @@ def initialize_experiment_folder():
     folder_path = CURR_DIR
     os.makedirs(folder_path, exist_ok=True)
     
-    # Create empty main.py, codepaths.txt, and datapaths.txt
+    # Create empty main.py, main.sh, codepaths.txt, and datapaths.txt
     open(os.path.join(folder_path, "main.py"), "w").close()
+    open(os.path.join(folder_path, "main.sh"), "w").close()
     open(os.path.join(folder_path, "codepaths.txt"), "w").close()
     open(os.path.join(folder_path, "datapaths.txt"), "w").close()
     
     print(f"Initialized experiment folder in: {folder_path}")
 
-def start_experiment():
-    # This function is specifically to allow calling this from within any script 
-    # i.e., put logger.start_experiment() in any file and it should do its loggy thing
+# def start_experiment():
+#     # This function is specifically to allow calling this from within any script 
+#     # i.e., put logger.start_experiment() in any file and it should do its loggy thing
     
-    setup_experiment_directory()
-    capture_environment_info()
-    copy_external_code()
-    load_data_paths()
-    run_experiment()
+#     setup_experiment_directory()
+#     capture_environment_info()
+#     copy_external_code()
+#     load_data_paths()
+#     # log_terminal()
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--initialize":
