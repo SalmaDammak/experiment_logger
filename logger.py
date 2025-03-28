@@ -124,6 +124,16 @@ def initialize_experiment_folder():
     
     print(f"Initialized experiment folder in: {folder_path}")
 
+def start_experiment():
+    # This function is specifically to allow calling this from within any script 
+    # i.e., put logger.start_experiment() in any file and it should do its loggy thing
+    
+    setup_experiment_directory()
+    capture_environment_info()
+    copy_external_code()
+    load_data_paths()
+    run_experiment()
+
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--initialize":
         initialize_experiment_folder()
